@@ -11,7 +11,7 @@ public class Main_탈출 {
 	static char[][] map;
 	static int R, C;
 	static boolean[][] check;
-	static boolean flag = false;
+	static boolean flag;
 	static int level;
 	public static void main(String[] args) throws IOException {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -24,19 +24,13 @@ public class Main_탈출 {
 		
 		//맵 초기화
 		map = new char[R][C];
-		int sY = 0;
-		int sX = 0;
-		int wY = 0;
-		int wX = 0;
+		int sY = 0;  //고슴도치 출발 좌표 Y
+		int sX = 0;  //고슴도치 출발 좌표 X
 		for(int i=0; i<R; i++) {
 			String str = br.readLine();
 			for(int j=0; j<C; j++) {
 				map[i][j] = str.charAt(j);
-				if(map[i][j] == '*') {
-					wY = i;
-					wX = j;
-//					map[i][j] = '0';
-				} else if(map[i][j] == 'S') {
+				if(map[i][j] == 'S') {
 					sY = i;
 					sX = j;
 				}
@@ -44,27 +38,32 @@ public class Main_탈출 {
 		}
 		
 		check = new boolean[R][C];
+		flag = false;
+		bfs(sY, sX);
 		
-		bfs(sY, sX, wY, wX);
-		
-		if(flag) {
+		if(flag) {  //비버굴로 도착가능할 때
 			System.out.print(level);
-		} else {
+		} else {  //비버굴로 도착 불가능할 때
 			System.out.print("KAKTUS");
 		}
 	}
 	
-	public static void bfs(int y, int x, int wY, int wX) {
-		Queue<Position> queue = new ArrayDeque<>();
+	public static void bfs(int y, int x) {
+		Queue<Position> queue = new ArrayDeque<>();  //고슴도치 이동지점 queue
 		queue.offer(new Position(y, x));
 		check[y][x] = true;
 		
+		Queue<Position> waterQueue = new ArrayDeque<>();  //물 이동지점 queue
+		for(int i=0; i<R; i++) {
+			for(int j=0; j<C; j++) {
+				if(map[i][j] == '*') {
+					waterQueue.offer(new Position(i, j));
+					check[i][j] = true;
+				}
+			}
+		}
 		
-		Queue<Position> waterQueue = new ArrayDeque<>();
-		queue.offer(new Position(wY, wX));
-		check[wY][wX] = true;
-		
-		level = 0;
+		level = 0;  //걸리는 시간(queue 레벨)
 		while(!queue.isEmpty()) {
 			int size = queue.size();
 			
@@ -100,7 +99,7 @@ public class Main_탈출 {
 					int nx = cur.x + dx[j];
 					
 					if(0<=ny&&ny<R && 0<=nx&&nx<C) {
-						if(!check[ny][nx] && map[ny][nx] == '.') {
+						if(!check[ny][nx] && map[ny][nx] != 'X') {
 							queue.offer(new Position(ny, nx));
 							check[ny][nx] = true;
 						}
@@ -108,7 +107,7 @@ public class Main_탈출 {
 				}
 			}
 			
-			level++;
+			level++;  //시간초 (queue레벨) 증가
 		}
 	}
 
